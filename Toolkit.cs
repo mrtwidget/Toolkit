@@ -29,10 +29,12 @@ namespace NEXIS.Toolkit
         #region Fields
 
         public static Toolkit Instance;
+        public Dictionary<CSteamID, decimal> Balances;
 
+        // Custom message colors
         public static Color DeathColor = new Color(50, 0, 200);
-        public static Color HeadshotColor = new Color(1, 85, 200);
-        public static Color PVPColor = new Color(100, 100, 1);
+        public static Color HeadshotColor = new Color(1, 50, 256);
+        public static Color PVPColor = new Color(1, 0, 200);
 
         #endregion
 
@@ -41,6 +43,7 @@ namespace NEXIS.Toolkit
         protected override void Load()
         {
             Instance = this;
+            Balances = new Dictionary<CSteamID, decimal>();
 
             U.Events.OnPlayerConnected += Events_OnPlayerConnected;
             U.Events.OnPlayerDisconnected += Events_OnPlayerDisconnected;
@@ -86,7 +89,7 @@ namespace NEXIS.Toolkit
                     {"toolkit_death_missile", "{0} took a missile to the {1} and was incinerated!"},
                     {"toolkit_death_punch", "{2} punched {0} in the {1} until he died. Brutal!"},
                     {"toolkit_death_roadkill", "{0} was run over by a vehicle {1} was driving!"},
-                    {"toolkit_death_sentry", "A sentry blew a hole in {0}'s {1} and died pooping himself."},
+                    {"toolkit_death_sentry", "A sentry blew a hole in {0}'s {1}! SENTRY: 1 {0}: 0"},
                     {"toolkit_death_shred", "{0} was shredded into a million pieces of meat confetti!"},
                     {"toolkit_death_spark", "{0} was sparked to death. WTF DOES THAT MEAN?!"},
                     {"toolkit_death_spit", "{0} was spit on and died of humiliation!"},
@@ -95,7 +98,11 @@ namespace NEXIS.Toolkit
                     {"toolkit_death_vehicle", "{0}'s vehicle exploded and so did his body. He's dead."},
                     {"toolkit_death_water", "{0} refused to hydrate and became a dried up, stinky corpse."},
                     {"toolkit_death_zombie", "{0} had his {1} ripped off and was beaten with it by a zombie!"},
-                    {"toolkit_death_headshot", "{1} headshot {0} with a {2} from a distance of {3}!"}
+                    {"toolkit_death_headshot", "{1} headshot {0} with a {2} from a distance of {3}!"},
+                    {"toolkit_player_initial_balance", "Welcome, {0}! We have given you {1} credits to get started. Buy something!"},
+                    {"toolkit_player_balance", "You have {0} credits"},
+                    {"toolkit_player_zombie_kill", "You received {0} credits for killing a Zombie"},
+                    {"toolkit_player_mega_zombie_kill", "You received {0} credits for killing a MEGA Zombie!"}
                 };
             }
         }
@@ -107,6 +114,14 @@ namespace NEXIS.Toolkit
         public void Events_OnPlayerConnected(UnturnedPlayer player)
         {
             UnturnedChat.Say(Translations.Instance.Translate("toolkit_player_connected", player.CharacterName), Color.gray);
+
+            if (!Balances.ContainsKey(player.CSteamID))
+            {
+                Balances.Add(player.CSteamID, Configuration.Instance.InitialBalance);
+                UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_player_initial_balance", player.CharacterName, String.Format("{0:C}", Configuration.Instance.InitialBalance)), Color.yellow);
+            }
+            else
+                UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_player_balance", String.Format("{0:C}", Balances[player.CSteamID])), Color.yellow);
         }
 
         public void Events_OnPlayerDisconnected(UnturnedPlayer player)
@@ -118,7 +133,10 @@ namespace NEXIS.Toolkit
         {
             // headshot?
             if (cause == EDeathCause.GUN && limb == ELimb.SKULL)
+            {
                 UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_headshot", player.CharacterName, ReturnMurdererName(murderer), UnturnedPlayer.FromCSteamID(murderer).Player.equipment.asset.itemName.ToString(), ReturnKillDistance(player, murderer)), HeadshotColor);
+                return;
+            }
 
             switch (cause)
             {
@@ -174,7 +192,7 @@ namespace NEXIS.Toolkit
                     UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_punch", player.CharacterName, ReturnLimb(limb), ReturnMurdererName(murderer)), PVPColor);
                     break;
                 case EDeathCause.ROADKILL:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_roadkill", player.CharacterName, ReturnLimb(limb), ReturnMurdererName(murderer)), PVPColor);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_roadkill", player.CharacterName, ReturnMurdererName(murderer)), PVPColor);
                     break;
                 case EDeathCause.SENTRY:
                     UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_sentry", player.CharacterName, ReturnLimb(limb)), DeathColor);
@@ -213,7 +231,22 @@ namespace NEXIS.Toolkit
 
         public void Events_OnPlayerUpdateStat(UnturnedPlayer player, EPlayerStat stat)
         {
+            if (!Configuration.Instance.PayZombieKills)
+                return;
 
+            if (stat == EPlayerStat.KILLS_ZOMBIES_NORMAL)
+            {
+                player.TriggerEffect(81); // money effect
+                Balances[player.CSteamID] = Decimal.Add(Balances[player.CSteamID], Configuration.Instance.PayoutZombie);
+                UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_player_zombie_kill", String.Format("{0:C}", Configuration.Instance.PayoutZombie)), Color.yellow);
+            }
+
+            if (stat == EPlayerStat.KILLS_ZOMBIES_MEGA)
+            {
+                player.TriggerEffect(81); // money effect
+                Balances[player.CSteamID] = Decimal.Add(Balances[player.CSteamID], Configuration.Instance.PayoutMegaZombie);
+                UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_player_mega_zombie_kill", String.Format("{0:C}", Configuration.Instance.PayoutMegaZombie)), Color.cyan);
+            }
         }
 
         #endregion
