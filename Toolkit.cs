@@ -30,6 +30,10 @@ namespace NEXIS.Toolkit
 
         public static Toolkit Instance;
 
+        public static Color DeathColor = new Color(50, 0, 200);
+        public static Color HeadshotColor = new Color(1, 85, 200);
+        public static Color PVPColor = new Color(100, 100, 1);
+
         #endregion
 
         #region Overrides
@@ -37,6 +41,7 @@ namespace NEXIS.Toolkit
         protected override void Load()
         {
             Instance = this;
+
             U.Events.OnPlayerConnected += Events_OnPlayerConnected;
             U.Events.OnPlayerDisconnected += Events_OnPlayerDisconnected;
             UnturnedPlayerEvents.OnPlayerDeath += Events_OnPlayerDeath;
@@ -61,6 +66,8 @@ namespace NEXIS.Toolkit
             {
                 return new TranslationList() {
                     {"toolkit_disabled", "Toolkit is currently unavailable"},
+                    {"toolkit_player_connected", "{0} has connected to the server"},
+                    {"toolkit_player_disconnected", "{0} gave up and left the server"},
                     {"toolkit_death_acid", "{0} was covered in acid and melted into a puddle of uncool."},
                     {"toolkit_death_animal", "{0} was mauled to death by a wild animal because he tried to pet it."},
                     {"toolkit_death_bleeding", "{0} couldn't find a medkit and bled to death. Everyone is disappointed."},
@@ -87,7 +94,8 @@ namespace NEXIS.Toolkit
                     {"toolkit_death_suicide", "{0} took the selfish way out and killed himself."},
                     {"toolkit_death_vehicle", "{0}'s vehicle exploded and so did his body. He's dead."},
                     {"toolkit_death_water", "{0} refused to hydrate and became a dried up, stinky corpse."},
-                    {"toolkit_death_zombie", "{0} his {1} ripped off and was beaten with it by a zombie!"}                    
+                    {"toolkit_death_zombie", "{0} had his {1} ripped off and was beaten with it by a zombie!"},
+                    {"toolkit_death_headshot", "{1} headshot {0} with a {2} from a distance of {3}!"}
                 };
             }
         }
@@ -98,98 +106,102 @@ namespace NEXIS.Toolkit
 
         public void Events_OnPlayerConnected(UnturnedPlayer player)
         {
-
+            UnturnedChat.Say(Translations.Instance.Translate("toolkit_player_connected", player.CharacterName), Color.gray);
         }
 
         public void Events_OnPlayerDisconnected(UnturnedPlayer player)
         {
-
+            UnturnedChat.Say(Translations.Instance.Translate("toolkit_player_disconnected", player.CharacterName), Color.black);
         }
 
         public void Events_OnPlayerDeath(UnturnedPlayer player, EDeathCause cause, ELimb limb, CSteamID murderer)
         {
+            // headshot?
+            if (cause == EDeathCause.GUN && limb == ELimb.SKULL)
+                UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_headshot", player.CharacterName, ReturnMurdererName(murderer), UnturnedPlayer.FromCSteamID(murderer).Player.equipment.asset.itemName.ToString(), ReturnKillDistance(player, murderer)), HeadshotColor);
+
             switch (cause)
             {
                 case EDeathCause.ACID:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_acid", player.CharacterName), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_acid", player.CharacterName), DeathColor);
                     break;
                 case EDeathCause.ANIMAL:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_animal", player.CharacterName), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_animal", player.CharacterName), DeathColor);
                     break;
                 case EDeathCause.BLEEDING:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_bleeding", player.CharacterName), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_bleeding", player.CharacterName), DeathColor);
                     break;
                 case EDeathCause.BONES:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_bones", player.CharacterName), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_bones", player.CharacterName), DeathColor);
                     break;
                 case EDeathCause.BOULDER:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_boulder", player.CharacterName), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_boulder", player.CharacterName), DeathColor);
                     break;
                 case EDeathCause.BREATH:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_breath", player.CharacterName), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_breath", player.CharacterName), DeathColor);
                     break;
                 case EDeathCause.BURNING:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_burning", player.CharacterName), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_burning", player.CharacterName), DeathColor);
                     break;
                 case EDeathCause.CHARGE:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_charge", player.CharacterName), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_charge", player.CharacterName), DeathColor);
                     break;
                 case EDeathCause.FOOD:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_food", player.CharacterName), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_food", player.CharacterName), DeathColor);
                     break;
                 case EDeathCause.FREEZING:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_freezing", player.CharacterName), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_freezing", player.CharacterName), DeathColor);
                     break;
                 case EDeathCause.GRENADE:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_grenade", player.CharacterName, ReturnLimb(limb)), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_grenade", player.CharacterName, ReturnLimb(limb)), DeathColor);
                     break;
                 case EDeathCause.GUN:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_gun", player.CharacterName, ReturnLimb(limb), ReturnMurdererName(murderer)), new Color(153,51,255));
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_gun", player.CharacterName, ReturnLimb(limb), ReturnMurdererName(murderer)), PVPColor);
                     break;
                 case EDeathCause.INFECTION:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_infection", player.CharacterName), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_infection", player.CharacterName), DeathColor);
                     break;
                 case EDeathCause.LANDMINE:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_landmine", player.CharacterName, ReturnLimb(limb)), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_landmine", player.CharacterName, ReturnLimb(limb)), DeathColor);
                     break;
                 case EDeathCause.MELEE:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_melee", player.CharacterName, ReturnLimb(limb), ReturnMurdererName(murderer)), new Color(153, 51, 255));
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_melee", player.CharacterName, ReturnLimb(limb), ReturnMurdererName(murderer)), PVPColor);
                     break;
                 case EDeathCause.MISSILE:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_missile", player.CharacterName, ReturnLimb(limb), Color.red));
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_missile", player.CharacterName, ReturnLimb(limb)), DeathColor);
                     break;
                 case EDeathCause.PUNCH:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_punch", player.CharacterName, ReturnLimb(limb), ReturnMurdererName(murderer)), new Color(153, 51, 255));
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_punch", player.CharacterName, ReturnLimb(limb), ReturnMurdererName(murderer)), PVPColor);
                     break;
                 case EDeathCause.ROADKILL:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_roadkill", player.CharacterName, ReturnLimb(limb), ReturnMurdererName(murderer)), new Color(153, 51, 255));
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_roadkill", player.CharacterName, ReturnLimb(limb), ReturnMurdererName(murderer)), PVPColor);
                     break;
                 case EDeathCause.SENTRY:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_sentry", player.CharacterName, ReturnLimb(limb)), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_sentry", player.CharacterName, ReturnLimb(limb)), DeathColor);
                     break;
                 case EDeathCause.SHRED:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_shred", player.CharacterName), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_shred", player.CharacterName), DeathColor);
                     break;
                 case EDeathCause.SPARK:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_spark", player.CharacterName), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_spark", player.CharacterName), DeathColor);
                     break;
                 case EDeathCause.SPIT:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_spit", player.CharacterName), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_spit", player.CharacterName), DeathColor);
                     break;
                 case EDeathCause.SPLASH:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_splash", player.CharacterName), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_splash", player.CharacterName), DeathColor);
                     break;
                 case EDeathCause.SUICIDE:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_suicide", player.CharacterName), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_suicide", player.CharacterName), DeathColor);
                     break;
                 case EDeathCause.VEHICLE:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_vehicle", player.CharacterName), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_vehicle", player.CharacterName), DeathColor);
                     break;
                 case EDeathCause.WATER:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_water", player.CharacterName), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_water", player.CharacterName), DeathColor);
                     break;
                 case EDeathCause.ZOMBIE:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_zombie", player.CharacterName, ReturnLimb(limb)), Color.red);
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_zombie", player.CharacterName, ReturnLimb(limb)), DeathColor);
                     break;
             }
         }
