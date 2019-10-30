@@ -61,12 +61,33 @@ namespace NEXIS.Toolkit
             {
                 return new TranslationList() {
                     {"toolkit_disabled", "Toolkit is currently unavailable"},
+                    {"toolkit_death_acid", "{0} was covered in acid and melted into a puddle of uncool."},
+                    {"toolkit_death_animal", "{0} was mauled to death by a wild animal because he tried to pet it."},
                     {"toolkit_death_bleeding", "{0} couldn't find a medkit and bled to death. Everyone is disappointed."},
-                    {"toolkit_death_zombie", "{0} his {1} ripped off and was beaten with it by a zombie!"},
-                    {"toolkit_death_vehicle", "{0}'s vehicle exploded and so did his body. He's dead."},
-                    {"toolkit_death_sentry", "A sentry blew a hole in {0}'s {1} and died pooping himself."},
+                    {"toolkit_death_bones", "{0} died from broken bones. How does that even happen?!"},
+                    {"toolkit_death_boulder", "A boulder crushed {0} to death. There's not much left..."},
+                    {"toolkit_death_breath", "{0} ran out of oxygen and suffocated to death. Very little was lost."},
+                    {"toolkit_death_burning", "{0} burned to death like a marshmallow over a campfire."},
+                    {"toolkit_death_charge", "{0} was electrocuted by a charge. Shocking!"},
+                    {"toolkit_death_food", "{0} refused to eat his vegetables and died of starvation!"},
+                    {"toolkit_death_freezing", "{0} forgot about the Laws of Thermodynamics and froze to death!"},
+                    {"toolkit_death_grenade", "A grenade blew off {0}'s {1} and everyone laughed! xD"},
+                    {"toolkit_death_gun", "{0} was shot in the {1} by and {2} and died!"},
+                    {"toolkit_death_infection", "{0} was infected and became a zombie himself!"},
                     {"toolkit_death_landmine", "{0} stepped on a landmine and blew his {1} into pieces! BRUH"},
-                    {"toolkit_death_grenade", "A grenade blew off {0}'s {1} and everyone laughed! xD"}
+                    {"toolkit_death_melee", "{2} hit {0} in the {1} until they died!"},
+                    {"toolkit_death_missile", "{0} took a missile to the {1} and was incinerated!"},
+                    {"toolkit_death_punch", "{2} punched {0} in the {1} until he died. Brutal!"},
+                    {"toolkit_death_roadkill", "{0} was run over by a vehicle {1} was driving!"},
+                    {"toolkit_death_sentry", "A sentry blew a hole in {0}'s {1} and died pooping himself."},
+                    {"toolkit_death_shred", "{0} was shredded into a million pieces of meat confetti!"},
+                    {"toolkit_death_spark", "{0} was sparked to death. WTF DOES THAT MEAN?!"},
+                    {"toolkit_death_spit", "{0} was spit on and died of humiliation!"},
+                    {"toolkit_death_splash", "{0} got too close and was killed by splash damage!"},
+                    {"toolkit_death_suicide", "{0} took the selfish way out and killed himself."},
+                    {"toolkit_death_vehicle", "{0}'s vehicle exploded and so did his body. He's dead."},
+                    {"toolkit_death_water", "{0} refused to hydrate and became a dried up, stinky corpse."},
+                    {"toolkit_death_zombie", "{0} his {1} ripped off and was beaten with it by a zombie!"}                    
                 };
             }
         }
@@ -89,26 +110,86 @@ namespace NEXIS.Toolkit
         {
             switch (cause)
             {
+                case EDeathCause.ACID:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_acid", player.CharacterName), Color.red);
+                    break;
+                case EDeathCause.ANIMAL:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_animal", player.CharacterName), Color.red);
+                    break;
                 case EDeathCause.BLEEDING:
                     UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_bleeding", player.CharacterName), Color.red);
                     break;
-                case EDeathCause.ZOMBIE:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_zombie", player.CharacterName, ReturnLimb(limb)), Color.red);
+                case EDeathCause.BONES:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_bones", player.CharacterName), Color.red);
                     break;
-                case EDeathCause.VEHICLE:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_vehicle", player.CharacterName), Color.red);
+                case EDeathCause.BOULDER:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_boulder", player.CharacterName), Color.red);
                     break;
-                case EDeathCause.SENTRY:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_sentry", player.CharacterName, ReturnLimb(limb)), Color.red);
+                case EDeathCause.BREATH:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_breath", player.CharacterName), Color.red);
                     break;
-                case EDeathCause.LANDMINE:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_landmine", player.CharacterName, ReturnLimb(limb)), Color.red);
+                case EDeathCause.BURNING:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_burning", player.CharacterName), Color.red);
+                    break;
+                case EDeathCause.CHARGE:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_charge", player.CharacterName), Color.red);
+                    break;
+                case EDeathCause.FOOD:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_food", player.CharacterName), Color.red);
+                    break;
+                case EDeathCause.FREEZING:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_freezing", player.CharacterName), Color.red);
                     break;
                 case EDeathCause.GRENADE:
                     UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_grenade", player.CharacterName, ReturnLimb(limb)), Color.red);
                     break;
-                case EDeathCause.:
-                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_grenade", player.CharacterName, ReturnLimb(limb)), Color.red);
+                case EDeathCause.GUN:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_gun", player.CharacterName, ReturnLimb(limb), ReturnMurdererName(murderer)), new Color(153,51,255));
+                    break;
+                case EDeathCause.INFECTION:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_infection", player.CharacterName), Color.red);
+                    break;
+                case EDeathCause.LANDMINE:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_landmine", player.CharacterName, ReturnLimb(limb)), Color.red);
+                    break;
+                case EDeathCause.MELEE:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_melee", player.CharacterName, ReturnLimb(limb), ReturnMurdererName(murderer)), new Color(153, 51, 255));
+                    break;
+                case EDeathCause.MISSILE:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_missile", player.CharacterName, ReturnLimb(limb), Color.red));
+                    break;
+                case EDeathCause.PUNCH:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_punch", player.CharacterName, ReturnLimb(limb), ReturnMurdererName(murderer)), new Color(153, 51, 255));
+                    break;
+                case EDeathCause.ROADKILL:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_roadkill", player.CharacterName, ReturnLimb(limb), ReturnMurdererName(murderer)), new Color(153, 51, 255));
+                    break;
+                case EDeathCause.SENTRY:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_sentry", player.CharacterName, ReturnLimb(limb)), Color.red);
+                    break;
+                case EDeathCause.SHRED:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_shred", player.CharacterName), Color.red);
+                    break;
+                case EDeathCause.SPARK:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_spark", player.CharacterName), Color.red);
+                    break;
+                case EDeathCause.SPIT:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_spit", player.CharacterName), Color.red);
+                    break;
+                case EDeathCause.SPLASH:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_splash", player.CharacterName), Color.red);
+                    break;
+                case EDeathCause.SUICIDE:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_suicide", player.CharacterName), Color.red);
+                    break;
+                case EDeathCause.VEHICLE:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_vehicle", player.CharacterName), Color.red);
+                    break;
+                case EDeathCause.WATER:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_water", player.CharacterName), Color.red);
+                    break;
+                case EDeathCause.ZOMBIE:
+                    UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_zombie", player.CharacterName, ReturnLimb(limb)), Color.red);
                     break;
             }
         }
@@ -162,6 +243,17 @@ namespace NEXIS.Toolkit
                 default:
                     return "somewhere";
             }
+        }
+
+        public string ReturnMurdererName(CSteamID murderer)
+        {
+            UnturnedPlayer killer = UnturnedPlayer.FromCSteamID(murderer);
+            return killer.CharacterName;
+        }
+
+        public string ReturnKillDistance(UnturnedPlayer player, CSteamID murderer)
+        {
+            return Math.Round((double)Vector3.Distance(player.Position, UnturnedPlayer.FromCSteamID(murderer).Position)).ToString() + "m";
         }
     }
 }
