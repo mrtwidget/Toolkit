@@ -36,7 +36,7 @@ namespace NEXIS.Toolkit
             else
             {
                 player.TriggerEffect(81); // money effect
-                UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_balance", String.Format("{0:C}", Toolkit.Instance.Balances[player.CSteamID])), Color.green);
+                UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_balance", String.Format("{0:C}", Toolkit.Instance.Balances[player.CSteamID.ToString()])), Color.green);
             }
         }
     }

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.IO;
 using System.Collections.Generic;
 using Rocket.Unturned;
 using Rocket.Core.Plugins;
@@ -11,16 +9,8 @@ using Rocket.API;
 using Rocket.API.Collections;
 using SDG.Unturned;
 using UnityEngine;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Logger = Rocket.Core.Logging.Logger;
-using Rocket.Core.Steam;
 using Steamworks;
-using System.Text.RegularExpressions;
-using System.Net;
-using System.Text;
-using System.Xml;
-using System.Threading;
 
 namespace NEXIS.Toolkit
 {
@@ -29,7 +19,10 @@ namespace NEXIS.Toolkit
         #region Fields
 
         public static Toolkit Instance;
-        public Dictionary<CSteamID, decimal> Balances;
+        public Dictionary<string, decimal> Balances;
+        public Credits Credits;
+        public Warps Warps;
+        public List<Warps> WarpList;
 
         // Custom message colors
         public static Color DeathColor = new Color(50, 0, 200);
@@ -43,7 +36,15 @@ namespace NEXIS.Toolkit
         protected override void Load()
         {
             Instance = this;
-            Balances = new Dictionary<CSteamID, decimal>();
+            Balances = new Dictionary<string, decimal>();
+
+            // load credits
+            Credits = new Credits();
+            Credits.Load();
+
+            // load warps
+            Warps = new Warps();
+            Warps.Load();
 
             U.Events.OnPlayerConnected += Events_OnPlayerConnected;
             U.Events.OnPlayerDisconnected += Events_OnPlayerDisconnected;
@@ -55,6 +56,9 @@ namespace NEXIS.Toolkit
 
         protected override void Unload()
         {
+            // save credits
+            Credits.Update();
+
             U.Events.OnPlayerConnected -= Events_OnPlayerConnected;
             U.Events.OnPlayerDisconnected -= Events_OnPlayerDisconnected;
             UnturnedPlayerEvents.OnPlayerDeath -= Events_OnPlayerDeath;
@@ -69,8 +73,13 @@ namespace NEXIS.Toolkit
             {
                 return new TranslationList() {
                     {"toolkit_disabled", "Toolkit is currently unavailable"},
+                    {"toolkit_admin_warp_added", "Added {0} warp costing {1} credits"},
+                    {"toolkit_admin_warp_node_added", "Warp node added to {0}"},
+                    {"toolkit_warp", "You warpped to {0} for {1} credits!"},
+                    {"toolkit_warp_noexist", "That warp location does not exist!"},
                     {"toolkit_player_connected", "{0} has connected to the server"},
                     {"toolkit_player_disconnected", "{0} gave up and left the server"},
+                    {"toolkit_insufficient_credits", "You don't have enough credits for that!"},
                     {"toolkit_death_acid", "{0} was covered in acid and melted into a puddle of uncool."},
                     {"toolkit_death_animal", "{0} was mauled to death by a wild animal because he tried to pet it."},
                     {"toolkit_death_bleeding", "{0} couldn't find a medkit and bled to death. Everyone is disappointed."},
@@ -102,7 +111,9 @@ namespace NEXIS.Toolkit
                     {"toolkit_player_initial_balance", "Welcome, {0}! We have given you {1} credits to get started. Buy something!"},
                     {"toolkit_player_balance", "You have {0} credits"},
                     {"toolkit_player_zombie_kill", "You received {0} credits for killing a Zombie"},
-                    {"toolkit_player_mega_zombie_kill", "You received {0} credits for killing a MEGA Zombie!"}
+                    {"toolkit_player_mega_zombie_kill", "You received {0} credits for killing a MEGA Zombie!"},
+                    {"toolkit_player_player_kill", "You received {0} credits for killing a player!"},
+                    {"toolkit_player_kill_multiplier", "You've been awarded an extra {1} credits for headshotting {0} above {2}m!"}
                 };
             }
         }
@@ -115,13 +126,14 @@ namespace NEXIS.Toolkit
         {
             UnturnedChat.Say(Translations.Instance.Translate("toolkit_player_connected", player.CharacterName), Color.gray);
 
-            if (!Balances.ContainsKey(player.CSteamID))
+            // load an existing balance or initiate a new one
+            if (!Balances.ContainsKey(player.CSteamID.ToString()))
             {
-                Balances.Add(player.CSteamID, Configuration.Instance.InitialBalance);
+                Balances.Add(player.CSteamID.ToString(), Configuration.Instance.InitialBalance);
                 UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_player_initial_balance", player.CharacterName, String.Format("{0:C}", Configuration.Instance.InitialBalance)), Color.yellow);
             }
             else
-                UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_player_balance", String.Format("{0:C}", Balances[player.CSteamID])), Color.yellow);
+                UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_player_balance", String.Format("{0:C}", Balances[player.CSteamID.ToString()])), Color.yellow);
         }
 
         public void Events_OnPlayerDisconnected(UnturnedPlayer player)
@@ -131,13 +143,92 @@ namespace NEXIS.Toolkit
 
         public void Events_OnPlayerDeath(UnturnedPlayer player, EDeathCause cause, ELimb limb, CSteamID murderer)
         {
-            // headshot?
+            // check for a headshot
             if (cause == EDeathCause.GUN && limb == ELimb.SKULL)
             {
-                UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_headshot", player.CharacterName, ReturnMurdererName(murderer), UnturnedPlayer.FromCSteamID(murderer).Player.equipment.asset.itemName.ToString(), ReturnKillDistance(player, murderer)), HeadshotColor);
+                // calculate distance of shot
+                double distance = ReturnKillDistance(player, murderer);
+
+                UnturnedChat.Say(Translations.Instance.Translate("toolkit_death_headshot", player.CharacterName, ReturnMurdererName(murderer), UnturnedPlayer.FromCSteamID(murderer).Player.equipment.asset.itemName.ToString(), distance + "m"), HeadshotColor);
+
+                // if enabled, pay multiplier credits
+                if (Configuration.Instance.PayDistanceMultiplier)
+                {
+                    // check if distance was over minimum amount
+                    if (distance >= Configuration.Instance.PayoutMinDistance)
+                    {
+                        // subtract minimum amount from total and pay player the remainder
+                        decimal payout = Convert.ToDecimal(distance - Configuration.Instance.PayoutMinDistance);
+                        Balances[murderer.ToString()] = Decimal.Add(Balances[murderer.ToString()], payout);
+                        UnturnedChat.Say(Translations.Instance.Translate("toolkit_player_kill_multiplier", player.CharacterName, payout, Configuration.Instance.PayoutMinDistance), Color.yellow);
+                    }
+                }
                 return;
             }
 
+            // send death message to chat
+            SendDeathMessage(player, cause, limb, murderer);
+        }
+
+        public void Events_OnPlayerChatted(UnturnedPlayer player, ref Color color, string message, EChatMode chatMode, ref bool cancel)
+        {
+
+        }
+
+        /**
+         * This function awards players credits for killing zombies and other
+         * players. Payout values can be edited in the config
+         */
+        public void Events_OnPlayerUpdateStat(UnturnedPlayer player, EPlayerStat stat)
+        {
+            switch (stat)
+            {
+                // normal zombie
+                case EPlayerStat.KILLS_ZOMBIES_NORMAL:
+                    if (Configuration.Instance.PayZombieKills)
+                    {
+                        player.TriggerEffect(81); // money effect
+                        Balances[player.CSteamID.ToString()] = Decimal.Add(Balances[player.CSteamID.ToString()], Configuration.Instance.PayoutKillZombie);
+                        UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_player_zombie_kill", String.Format("{0:C}", Configuration.Instance.PayoutKillZombie)), Color.yellow);
+                    }
+                    break;
+                // mega zombie
+                case EPlayerStat.KILLS_ZOMBIES_MEGA:
+                    if (Configuration.Instance.PayZombieKills)
+                    {
+                        player.TriggerEffect(81); // money effect
+                        Balances[player.CSteamID.ToString()] = Decimal.Add(Balances[player.CSteamID.ToString()], Configuration.Instance.PayoutKillMegaZombie);
+                        UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_player_mega_zombie_kill", String.Format("{0:C}", Configuration.Instance.PayoutKillMegaZombie)), Color.magenta);
+                    }
+                    break;
+                // players
+                case EPlayerStat.KILLS_PLAYERS:
+                    if (Configuration.Instance.PayPlayerKills)
+                    {
+                        player.TriggerEffect(81); // money effect
+                        Balances[player.CSteamID.ToString()] = Decimal.Add(Balances[player.CSteamID.ToString()], Configuration.Instance.PayoutKillPlayer);
+                        UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_player_player_kill", String.Format("{0:C}", Configuration.Instance.PayoutKillPlayer)), Color.cyan);
+                    }
+                    break;
+            }
+        }
+
+        #endregion
+
+        public void FixedUpdate()
+        {
+            if (Instance.State != PluginState.Loaded) return;
+
+        }
+
+        /**
+         * SEND CUSTOM DEATH MESSAGE
+         * This function sends a customized death message to world chat
+         * depentant on the cause of death. These messages can be edited in
+         * the translation file to customize them. 
+         */
+        public void SendDeathMessage(UnturnedPlayer player, EDeathCause cause, ELimb limb, CSteamID murderer)
+        {
             switch (cause)
             {
                 case EDeathCause.ACID:
@@ -224,39 +315,12 @@ namespace NEXIS.Toolkit
             }
         }
 
-        public void Events_OnPlayerChatted(UnturnedPlayer player, ref Color color, string message, EChatMode chatMode, ref bool cancel)
-        {
-
-        }
-
-        public void Events_OnPlayerUpdateStat(UnturnedPlayer player, EPlayerStat stat)
-        {
-            if (!Configuration.Instance.PayZombieKills)
-                return;
-
-            if (stat == EPlayerStat.KILLS_ZOMBIES_NORMAL)
-            {
-                player.TriggerEffect(81); // money effect
-                Balances[player.CSteamID] = Decimal.Add(Balances[player.CSteamID], Configuration.Instance.PayoutZombie);
-                UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_player_zombie_kill", String.Format("{0:C}", Configuration.Instance.PayoutZombie)), Color.yellow);
-            }
-
-            if (stat == EPlayerStat.KILLS_ZOMBIES_MEGA)
-            {
-                player.TriggerEffect(81); // money effect
-                Balances[player.CSteamID] = Decimal.Add(Balances[player.CSteamID], Configuration.Instance.PayoutMegaZombie);
-                UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_player_mega_zombie_kill", String.Format("{0:C}", Configuration.Instance.PayoutMegaZombie)), Color.cyan);
-            }
-        }
-
-        #endregion
-
-        public void FixedUpdate()
-        {
-            if (Instance.State != PluginState.Loaded) return;
-
-        }
-
+        /**
+         * RETURN LIMB NAME
+         * This function returns a string of which limb was hit on a player.
+         * Using a switch to do this seems cumbersome, but I'm uncertain if
+         * there is a better way to do this, so. Here we are.
+         */
         public string ReturnLimb(ELimb limb)
         {
             switch (limb)
@@ -290,15 +354,26 @@ namespace NEXIS.Toolkit
             }
         }
 
+        /**
+         * RETURN CHARACTER NAME FROM STEAMID
+         * This function returns the character name of a player by converting
+         * CSteamID to UnturnedPlayer by using the FromCSteamID() function.
+         */
         public string ReturnMurdererName(CSteamID murderer)
         {
             UnturnedPlayer killer = UnturnedPlayer.FromCSteamID(murderer);
             return killer.CharacterName;
         }
 
-        public string ReturnKillDistance(UnturnedPlayer player, CSteamID murderer)
+        /**
+         * CALCULATE DISTANCE OF KILL
+         * This function calculates the distance between two players by using
+         * the Vector3.Distance() function.
+         */
+        public double ReturnKillDistance(UnturnedPlayer player, CSteamID murderer)
         {
-            return Math.Round((double)Vector3.Distance(player.Position, UnturnedPlayer.FromCSteamID(murderer).Position)).ToString() + "m";
+            return Math.Round((double)Vector3.Distance(player.Position, UnturnedPlayer.FromCSteamID(murderer).Position));
         }
+
     }
 }

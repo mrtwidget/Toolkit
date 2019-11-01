@@ -81,12 +81,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Admin\CommandAddWarp.cs" />
+    <Compile Include="Admin\CommandAddWarpNode.cs" />
     <Compile Include="Admin\CommandColor.cs" />
+    <Compile Include="Credits.cs" />
     <Compile Include="Players\CommandBalance.cs" />
     <Compile Include="Players\CommandWarp.cs" />
+    <Compile Include="Players\CommandWarps.cs" />
     <Compile Include="Toolkit.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ToolkitConfiguration.cs" />
+    <Compile Include="Warps.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
