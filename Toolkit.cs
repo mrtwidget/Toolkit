@@ -51,6 +51,23 @@ namespace NEXIS.Toolkit
             UnturnedPlayerEvents.OnPlayerDeath += Events_OnPlayerDeath;
             UnturnedPlayerEvents.OnPlayerChatted += Events_OnPlayerChatted;
             UnturnedPlayerEvents.OnPlayerUpdateStat += Events_OnPlayerUpdateStat;
+
+            // load connected players if loaded on-the-fly
+            if (Provider.clients.Count > 0)
+            {
+                Logger.Log(Provider.clients.Count + " are currently connected. Loading...", ConsoleColor.Yellow);
+
+                // loop through all players
+                for (int i = 0; i < Provider.clients.Count; i++)
+                {
+                    SteamPlayer plr = Provider.clients[i];
+                    if (plr == null) continue;
+
+                    UnturnedPlayer player = UnturnedPlayer.FromSteamPlayer(plr);
+                    Events_OnPlayerConnected(player);
+                }
+            }
+
             Logger.Log("Loaded!", ConsoleColor.DarkGreen);
         }
 
@@ -75,8 +92,11 @@ namespace NEXIS.Toolkit
                     {"toolkit_disabled", "Toolkit is currently unavailable"},
                     {"toolkit_admin_warp_added", "Added {0} warp costing {1} credits"},
                     {"toolkit_admin_warp_node_added", "Warp node added to {0}"},
-                    {"toolkit_warp", "You warpped to {0} for {1} credits!"},
+                    {"toolkit_warp", "You warpped to {0} costing -{1} credits!"},
                     {"toolkit_warp_noexist", "That warp location does not exist!"},
+                    {"toolkit_warp_info", "You can warp by typing: /warp <location> or see a list of warps by typing: /warps"},
+                    {"toolkit_buy_info", "Buy items by typing: /buy <id>, Sell items: /sell <id>, Price: /cost <id>"},
+                    {"toolkit_buy_vehicle_info", "You can buy vehicles by typing: /vbuy <id|name>, or /vcost <id|name> for the price"},
                     {"toolkit_player_connected", "{0} has connected to the server"},
                     {"toolkit_player_disconnected", "{0} gave up and left the server"},
                     {"toolkit_insufficient_credits", "You don't have enough credits for that!"},
@@ -109,7 +129,7 @@ namespace NEXIS.Toolkit
                     {"toolkit_death_zombie", "{0} had his {1} ripped off and was beaten with it by a zombie!"},
                     {"toolkit_death_headshot", "{1} headshot {0} with a {2} from a distance of {3}!"},
                     {"toolkit_player_initial_balance", "Welcome, {0}! We have given you {1} credits to get started. Buy something!"},
-                    {"toolkit_player_balance", "You have {0} credits"},
+                    {"toolkit_player_balance", "You have {0} in credits. Spend them wisely."},
                     {"toolkit_player_zombie_kill", "You received {0} credits for killing a Zombie"},
                     {"toolkit_player_mega_zombie_kill", "You received {0} credits for killing a MEGA Zombie!"},
                     {"toolkit_player_player_kill", "You received {0} credits for killing a player!"},
@@ -172,7 +192,20 @@ namespace NEXIS.Toolkit
 
         public void Events_OnPlayerChatted(UnturnedPlayer player, ref Color color, string message, EChatMode chatMode, ref bool cancel)
         {
+            if (Configuration.Instance.EnableChatSuggestions)
+            {
+                if (!message.StartsWith("/") && (chatMode == EChatMode.GLOBAL || chatMode == EChatMode.LOCAL))
+                {
+                    string msg = message.ToLower();
 
+                    if (msg.Contains("how") && (msg.Contains("warp") || msg.Contains("warps")))
+                        UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_warp_info"), Color.white);
+                    else if (msg.Contains("how") && (msg.Contains("vehicle") || msg.Contains("car") || msg.Contains("jet") || msg.Contains("heli") || msg.Contains("apc")))
+                        UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_buy_vehicle_info"), Color.white);
+                    else if (msg.Contains("how") && (msg.Contains("buy") || msg.Contains("purchase") || msg.Contains("sell") || msg.Contains("cost") || msg.Contains("price")))
+                        UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_buy_info"), Color.white);
+                }
+            }
         }
 
         /**

@@ -10,6 +10,7 @@ namespace NEXIS.Toolkit
         public bool PayZombieKills;
         public bool PayPlayerKills;
         public bool PayDistanceMultiplier;
+        public bool EnableChatSuggestions;
         public double PayoutMinDistance;
         public decimal PayoutKillZombie;
         public decimal PayoutKillMegaZombie;
@@ -23,6 +24,7 @@ namespace NEXIS.Toolkit
             PayZombieKills = true;
             PayPlayerKills = true;
             PayDistanceMultiplier = true;
+            EnableChatSuggestions = true;
             PayoutMinDistance = 50;
             PayoutKillZombie = 5.0m;
             PayoutKillMegaZombie = 50.0m;
