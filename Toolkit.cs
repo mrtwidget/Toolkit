@@ -408,5 +408,15 @@ namespace NEXIS.Toolkit
             return Math.Round((double)Vector3.Distance(player.Position, UnturnedPlayer.FromCSteamID(murderer).Position));
         }
 
+        public bool IsDigits(string str)
+        {
+            foreach (char c in str)
+            {
+                if (c < '0' || c > '9')
+                    return false;
+            }
+
+            return true;
+        }
     }
 }

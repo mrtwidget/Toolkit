@@ -86,6 +86,11 @@
     <Compile Include="Admin\CommandColor.cs" />
     <Compile Include="Credits.cs" />
     <Compile Include="Players\CommandBalance.cs" />
+    <Compile Include="Players\CommandBuy.cs" />
+    <Compile Include="Players\CommandCost.cs" />
+    <Compile Include="Players\CommandSell.cs" />
+    <Compile Include="Players\CommandVbuy.cs" />
+    <Compile Include="Players\CommandVcost.cs" />
     <Compile Include="Players\CommandWarp.cs" />
     <Compile Include="Players\CommandWarps.cs" />
     <Compile Include="Toolkit.cs" />
