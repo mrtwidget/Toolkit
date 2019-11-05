@@ -53,7 +53,7 @@ namespace NEXIS.Toolkit.Players
                         Toolkit.Instance.Balances[player.CSteamID.ToString()] = Decimal.Subtract(Toolkit.Instance.Balances[player.CSteamID.ToString()], (item.BuyPrice * amount));
 
                         player.GiveItem(Convert.ToUInt16(command[0]), amount);
-                        UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_buy", item.Name, String.Format("{0:C}", item.BuyPrice)), Color.green);
+                        UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_buy", item.Name, String.Format("{0:C}", item.BuyPrice * amount), amount), Color.green);
                     }
                     else
                         UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_buy_insufficient_credits"), Color.red);

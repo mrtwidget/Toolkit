@@ -34,7 +34,12 @@ namespace NEXIS.Toolkit.Players
 
             if (command.Length == 1 && Toolkit.Instance.IsDigits(command[0]))
             {
-                UnturnedChat.Say(caller, "Everything is free right now!", Color.green);
+                var item = Toolkit.Instance.ItemList.Find(x => x.ID == Convert.ToUInt16(command[0]));
+
+                if (item == null)
+                    UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_buy_noexist"), Color.red);
+                else
+                    UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_buy_cost", item.ID, item.Name, String.Format("{0:C}", item.BuyPrice), String.Format("{0:C}", item.SellPrice)), Color.green);
             }
             else
             {
