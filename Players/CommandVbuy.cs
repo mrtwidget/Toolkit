@@ -34,8 +34,25 @@ namespace NEXIS.Toolkit.Players
 
             if (command.Length == 1 && Toolkit.Instance.IsDigits(command[0]))
             {
-                player.GiveVehicle(Convert.ToUInt16(command[0]));
-                UnturnedChat.Say(caller, "You spawned a vehicle!", Color.green);
+                // see if vehicle exists in shop
+                var item = Toolkit.Instance.VehicleList.Find(x => x.ID == Convert.ToUInt16(command[0]));
+
+                if (item == null)
+                    UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_buy_noexist"), Color.red);
+                else
+                {
+                    // check if player can afford vehicle
+                    if (Toolkit.Instance.Balances[player.CSteamID.ToString()] >= item.BuyPrice)
+                    {
+                        // charge player credits for vehicle
+                        Toolkit.Instance.Balances[player.CSteamID.ToString()] = Decimal.Subtract(Toolkit.Instance.Balances[player.CSteamID.ToString()], item.BuyPrice);
+
+                        player.GiveVehicle(Convert.ToUInt16(command[0]));
+                        UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_buy", item.Name, String.Format("{0:C}", item.BuyPrice)), Color.green);
+                    }
+                    else
+                        UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_buy_insufficient_credits"), Color.red);
+                }
             }
             else
             {

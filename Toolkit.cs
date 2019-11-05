@@ -23,6 +23,10 @@ namespace NEXIS.Toolkit
         public Credits Credits;
         public Warps Warps;
         public List<Warps> WarpList;
+        public Items Items;
+        public List<Items> ItemList;
+        public Vehicles Vehicles;
+        public List<Vehicles> VehicleList;
 
         // Custom message colors
         public static Color DeathColor = new Color(50, 0, 200);
@@ -45,6 +49,14 @@ namespace NEXIS.Toolkit
             // load warps
             Warps = new Warps();
             Warps.Load();
+
+            // load items
+            Items = new Items();
+            Items.Load();
+
+            // load vehicles
+            Vehicles = new Vehicles();
+            Vehicles.Load();
 
             U.Events.OnPlayerConnected += Events_OnPlayerConnected;
             U.Events.OnPlayerDisconnected += Events_OnPlayerDisconnected;
@@ -76,6 +88,10 @@ namespace NEXIS.Toolkit
             // save credits
             Credits.Update();
 
+            // update shop
+            Items.Update();
+            Vehicles.Update();
+
             U.Events.OnPlayerConnected -= Events_OnPlayerConnected;
             U.Events.OnPlayerDisconnected -= Events_OnPlayerDisconnected;
             UnturnedPlayerEvents.OnPlayerDeath -= Events_OnPlayerDeath;
@@ -97,6 +113,11 @@ namespace NEXIS.Toolkit
                     {"toolkit_warp_info", "You can warp by typing: /warp <location> or see a list of warps by typing: /warps"},
                     {"toolkit_buy_info", "Buy items by typing: /buy <id>, Sell items: /sell <id>, Price: /cost <id>"},
                     {"toolkit_buy_vehicle_info", "You can buy vehicles by typing: /vbuy <id|name>, or /vcost <id|name> for the price"},
+                    {"toolkit_admin_item_added", "Added {1}({0}) to Shop - Buy Price: {2}, Sell Price: {3}"},
+                    {"toolkit_admin_vehicle_added", "Added {1}({0}) to Shop - Buy Price: {2}"},
+                    {"toolkit_player_buy_noexist", "That item does not exist in the Shop!"},
+                    {"toolkit_player_buy_insufficient_credits", "You do not have enough credits to afford this!"},
+                    {"toolkit_player_buy", "You purchased a {0} for {1} credits!"},
                     {"toolkit_player_connected", "{0} has connected to the server"},
                     {"toolkit_player_disconnected", "{0} gave up and left the server"},
                     {"toolkit_insufficient_credits", "You don't have enough credits for that!"},

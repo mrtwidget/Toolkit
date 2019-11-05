@@ -81,6 +81,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Admin\CommandAddItem.cs" />
+    <Compile Include="Admin\CommandAddVehicle.cs" />
     <Compile Include="Admin\CommandAddWarp.cs" />
     <Compile Include="Admin\CommandAddWarpNode.cs" />
     <Compile Include="Admin\CommandColor.cs" />
@@ -93,9 +95,11 @@
     <Compile Include="Players\CommandVcost.cs" />
     <Compile Include="Players\CommandWarp.cs" />
     <Compile Include="Players\CommandWarps.cs" />
+    <Compile Include="Items.cs" />
     <Compile Include="Toolkit.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ToolkitConfiguration.cs" />
+    <Compile Include="Vehicles.cs" />
     <Compile Include="Warps.cs" />
   </ItemGroup>
   <ItemGroup />

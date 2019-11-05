@@ -18,7 +18,7 @@ namespace NEXIS.Toolkit
                 File.WriteAllText(Toolkit.Instance.Configuration.Instance.DataDirectory + "Credits.json", "{}");
             }
 
-            // load warps file to list
+            // load credits to list
             string file = File.ReadAllText(Toolkit.Instance.Configuration.Instance.DataDirectory + "Credits.json");
             JObject json = JObject.Parse(file);
             Toolkit.Instance.Balances = json.ToObject<Dictionary<string, decimal>>();
@@ -29,7 +29,7 @@ namespace NEXIS.Toolkit
 
         public void Update()
         {
-            // save warp list to file
+            // save credits to file
             string json = JsonConvert.SerializeObject(Toolkit.Instance.Balances, Newtonsoft.Json.Formatting.Indented);
             File.WriteAllText(Toolkit.Instance.Configuration.Instance.DataDirectory + "Credits.json", json);
         }

@@ -34,11 +34,30 @@ namespace NEXIS.Toolkit.Players
 
             if (command.Length >= 1 && Toolkit.Instance.IsDigits(command[0]))
             {
-                if (command.Length == 1 || !Toolkit.Instance.IsDigits(command[1]))
-                    command[1] = "1";
+                byte amount = 1;
 
-                player.GiveItem(Convert.ToUInt16(command[0]), Convert.ToByte(command[1]));
-                UnturnedChat.Say(caller, "Item added to your inventory!", Color.green);
+                if (command.Length == 2 && Convert.ToByte(command[1]) > 0)
+                    amount = Convert.ToByte(command[1]);
+
+                // see if item exists in shop
+                var item = Toolkit.Instance.ItemList.Find(x => x.ID == Convert.ToUInt16(command[0]));
+                
+                if (item == null)
+                    UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_buy_noexist"), Color.red);
+                else
+                {
+                    // check if player can afford item
+                    if (Toolkit.Instance.Balances[player.CSteamID.ToString()] >= (item.BuyPrice * amount))
+                    {
+                        // charge player credits for item(s)
+                        Toolkit.Instance.Balances[player.CSteamID.ToString()] = Decimal.Subtract(Toolkit.Instance.Balances[player.CSteamID.ToString()], (item.BuyPrice * amount));
+
+                        player.GiveItem(Convert.ToUInt16(command[0]), amount);
+                        UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_buy", item.Name, String.Format("{0:C}", item.BuyPrice)), Color.green);
+                    }
+                    else
+                        UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_buy_insufficient_credits"), Color.red);
+                }
             }
             else
             {
