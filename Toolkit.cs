@@ -28,6 +28,7 @@ namespace NEXIS.Toolkit
         public List<Items> ItemList;
         public Vehicles Vehicles;
         public List<Vehicles> VehicleList;
+        public int DayRequests;
 
         // Custom message colors
         public static Color DeathColor = new Color(50, 0, 200);
@@ -43,6 +44,7 @@ namespace NEXIS.Toolkit
             Instance = this;
             Balances = new Dictionary<string, decimal>();
             TPArequests = new List<TPA>();
+            DayRequests = 0;
 
             // load credits
             Credits = new Credits();
@@ -108,10 +110,13 @@ namespace NEXIS.Toolkit
             {
                 return new TranslationList() {
                     {"toolkit_disabled", "Toolkit is currently unavailable"},
+                    {"toolkit_day", "Time changed to Day per player requests!"},
+                    {"toolkit_day_request", "Players are requesting Daytime. {0} more players need to say \"day\" in chat to change it"},
                     {"toolkit_admin_warp_added", "Added {0} warp costing {1} credits"},
                     {"toolkit_admin_warp_node_added", "Warp node added to {0}"},
                     {"toolkit_warp", "You warpped to {0} costing -{1} credits!"},
                     {"toolkit_warp_noexist", "That warp location does not exist!"},
+                    {"toolkit_tpa_info", "You can teleport to another player by typing: /tpa <name>"},
                     {"toolkit_warp_info", "You can warp by typing: /warp <location> or see a list of warps by typing: /warps"},
                     {"toolkit_buy_info", "Buy items by typing: /buy <id>, Sell items: /sell <id>, Price: /cost <id>"},
                     {"toolkit_buy_vehicle_info", "You can buy vehicles by typing: /vbuy <id>, or /vcost <id> for the price"},
@@ -224,18 +229,44 @@ namespace NEXIS.Toolkit
 
         public void Events_OnPlayerChatted(UnturnedPlayer player, ref Color color, string message, EChatMode chatMode, ref bool cancel)
         {
+            // change time to day if enough players say "day" in global chat
+            if (Configuration.Instance.ChangeDaytimeChat)
+            {
+                if (!message.StartsWith("/") && chatMode == EChatMode.GLOBAL)
+                {
+                    string msg = message.ToLower();
+
+                    if (msg == "day")
+                    {
+                        if (DayRequests >= (Provider.clients.Count / 2))
+                        {
+                            DayRequests = 0;
+                            LightingManager.time = 365;
+                            UnturnedChat.Say(Translations.Instance.Translate("toolkit_day"), Color.white);
+                        }
+                        else
+                            UnturnedChat.Say(Translations.Instance.Translate("toolkit_day_request", (Provider.clients.Count / 2) - DayRequests), Color.white);
+
+                        DayRequests++;
+                    }
+                }
+            }
+
+            // show suggestions if players type certain keywords
             if (Configuration.Instance.EnableChatSuggestions)
             {
                 if (!message.StartsWith("/") && (chatMode == EChatMode.GLOBAL || chatMode == EChatMode.LOCAL))
                 {
                     string msg = message.ToLower();
 
-                    if (msg.Contains("how") && (msg.Contains("warp") || msg.Contains("warps")))
+                    if ((msg.Contains("what") || msg.Contains("how")) && (msg.Contains("warp") || msg.Contains("warps")))
                         UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_warp_info"), Color.white);
-                    else if (msg.Contains("how") && (msg.Contains("vehicle") || msg.Contains("car") || msg.Contains("jet") || msg.Contains("heli") || msg.Contains("apc")))
+                    else if ((msg.Contains("what") || msg.Contains("how")) && (msg.Contains("vehicle") || msg.Contains("car") || msg.Contains("jet") || msg.Contains("heli") || msg.Contains("apc")))
                         UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_buy_vehicle_info"), Color.white);
-                    else if (msg.Contains("how") && (msg.Contains("buy") || msg.Contains("purchase") || msg.Contains("sell") || msg.Contains("cost") || msg.Contains("price")))
+                    else if ((msg.Contains("what") || msg.Contains("how")) && (msg.Contains("buy") || msg.Contains("purchase") || msg.Contains("sell") || msg.Contains("cost") || msg.Contains("price")))
                         UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_buy_info"), Color.white);
+                    else if ((msg.Contains("what") || msg.Contains("how")) && (msg.Contains("tpa") || msg.Contains("teleport")))
+                        UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_tpa_info"), Color.white);
                 }
             }
         }

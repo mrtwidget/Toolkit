@@ -17,6 +17,7 @@ namespace NEXIS.Toolkit
         public decimal PayoutKillPlayer;
         public bool EnableTPATimeout;
         public int TPATimeout;
+        public bool ChangeDaytimeChat;
 
         public void LoadDefaults()
         {
@@ -33,6 +34,7 @@ namespace NEXIS.Toolkit
             PayoutKillPlayer = 100.0m;
             EnableTPATimeout = true;
             TPATimeout = 30;
+            ChangeDaytimeChat = true;
         }
     }
 }
