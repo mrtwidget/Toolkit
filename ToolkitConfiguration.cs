@@ -15,6 +15,8 @@ namespace NEXIS.Toolkit
         public decimal PayoutKillZombie;
         public decimal PayoutKillMegaZombie;
         public decimal PayoutKillPlayer;
+        public bool EnableTPATimeout;
+        public int TPATimeout;
 
         public void LoadDefaults()
         {
@@ -29,6 +31,8 @@ namespace NEXIS.Toolkit
             PayoutKillZombie = 5.0m;
             PayoutKillMegaZombie = 50.0m;
             PayoutKillPlayer = 100.0m;
+            EnableTPATimeout = true;
+            TPATimeout = 30;
         }
     }
 }

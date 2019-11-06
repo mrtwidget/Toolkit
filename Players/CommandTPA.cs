@@ -45,6 +45,13 @@ namespace NEXIS.Toolkit.Players
                         return;
                     }
 
+                    if (Toolkit.Instance.Configuration.Instance.EnableTPATimeout && (DateTime.Now - request.TimeRequested).TotalSeconds > Toolkit.Instance.Configuration.Instance.TPATimeout)
+                    {
+                        Toolkit.Instance.TPArequests.Remove(request);
+                        UnturnedChat.Say(player, Toolkit.Instance.Translations.Instance.Translate("toolkit_tpa_request_null"), Color.red);
+                        return;
+                    }
+
                     UnturnedPlayer p = UnturnedPlayer.FromCSteamID(request.PlayerRequesting);
                     p.Teleport(player);
                     p.TriggerEffect(147); // electricity effect
@@ -67,6 +74,13 @@ namespace NEXIS.Toolkit.Players
                         return;
                     }
 
+                    if (Toolkit.Instance.Configuration.Instance.EnableTPATimeout && (DateTime.Now - request.TimeRequested).TotalSeconds > Toolkit.Instance.Configuration.Instance.TPATimeout)
+                    {
+                        Toolkit.Instance.TPArequests.Remove(request);
+                        UnturnedChat.Say(player, Toolkit.Instance.Translations.Instance.Translate("toolkit_tpa_request_null"), Color.red);
+                        return;
+                    }
+
                     UnturnedPlayer p = UnturnedPlayer.FromCSteamID(request.PlayerRequesting);
                     Toolkit.Instance.TPArequests.Remove(request);
 
@@ -75,6 +89,11 @@ namespace NEXIS.Toolkit.Players
 
                     return;
                 }
+
+                // remove previous request if one exists
+                TPA existing = Toolkit.Instance.TPArequests.Find(x => x.PlayerRequesting == player.CSteamID);
+                if (existing != null)
+                    Toolkit.Instance.TPArequests.Remove(existing);
 
                 foreach (SteamPlayer plr in Provider.clients)
                 {
