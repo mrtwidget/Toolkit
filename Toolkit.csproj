@@ -91,6 +91,7 @@
     <Compile Include="Players\CommandBuy.cs" />
     <Compile Include="Players\CommandCost.cs" />
     <Compile Include="Players\CommandSell.cs" />
+    <Compile Include="Players\CommandTPA.cs" />
     <Compile Include="Players\CommandVbuy.cs" />
     <Compile Include="Players\CommandVcost.cs" />
     <Compile Include="Players\CommandWarp.cs" />
@@ -99,9 +100,13 @@
     <Compile Include="Toolkit.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ToolkitConfiguration.cs" />
+    <Compile Include="TPA.cs" />
     <Compile Include="Vehicles.cs" />
     <Compile Include="Warps.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Extra\Items.json" />
+    <None Include="Extra\Vehicles.json" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

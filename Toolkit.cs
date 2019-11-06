@@ -19,6 +19,7 @@ namespace NEXIS.Toolkit
         #region Fields
 
         public static Toolkit Instance;
+        public List<TPA> TPArequests;
         public Dictionary<string, decimal> Balances;
         public Credits Credits;
         public Warps Warps;
@@ -41,6 +42,7 @@ namespace NEXIS.Toolkit
         {
             Instance = this;
             Balances = new Dictionary<string, decimal>();
+            TPArequests = new List<TPA>();
 
             // load credits
             Credits = new Credits();
@@ -123,6 +125,13 @@ namespace NEXIS.Toolkit
                     {"toolkit_player_connected", "{0} has connected to the server"},
                     {"toolkit_player_disconnected", "{0} gave up and left the server"},
                     {"toolkit_insufficient_credits", "You don't have enough credits for that!"},
+                    {"toolkit_tpa_request", "{0} has sent a request to teleport to your location. Type: /tpa accept, or /tpa deny"},
+                    {"toolkit_tpa_request_caller", "You have sent a teleport request to {0}. Waiting for them to respond..."},
+                    {"toolkit_tpa_request_null", "You have no teleport requests waiting..."},
+                    {"toolkit_tpa_request_deny", "{0} has denied your teleport request"},
+                    {"toolkit_tpa_request_deny_caller", "You have denied {0}'s teleport request"},
+                    {"toolkit_tpa_request_accept", "{0} has accepted your teleport request!"},
+                    {"toolkit_tpa_request_accept_caller", "{0} has been teleported to your location!"},
                     {"toolkit_death_acid", "{0} was covered in acid and melted into a puddle of uncool."},
                     {"toolkit_death_animal", "{0} was mauled to death by a wild animal because he tried to pet it."},
                     {"toolkit_death_bleeding", "{0} couldn't find a medkit and bled to death. Everyone is disappointed."},
