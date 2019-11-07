@@ -114,6 +114,8 @@ namespace NEXIS.Toolkit.Players
                         break;
                     }
                 }
+
+                UnturnedChat.Say(player, Toolkit.Instance.Translations.Instance.Translate("toolkit_tpa_player_null"), Color.red);
             }
             else
             {

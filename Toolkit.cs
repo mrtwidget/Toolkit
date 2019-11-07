@@ -133,6 +133,7 @@ namespace NEXIS.Toolkit
                     {"toolkit_tpa_request", "{0} has sent a request to teleport to your location. Type: /tpa accept, or /tpa deny"},
                     {"toolkit_tpa_request_caller", "You have sent a teleport request to {0}. Waiting for them to respond..."},
                     {"toolkit_tpa_request_null", "You have no teleport requests waiting..."},
+                    {"toolkit_tpa_player_null", "Could not find a player with that name. Try again."},
                     {"toolkit_tpa_request_deny", "{0} has denied your teleport request"},
                     {"toolkit_tpa_request_deny_caller", "You have denied {0}'s teleport request"},
                     {"toolkit_tpa_request_accept", "{0} has accepted your teleport request!"},
