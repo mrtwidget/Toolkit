@@ -105,6 +105,9 @@ namespace NEXIS.Toolkit
             // update kits
             Kits.Update();
 
+            // update warps
+            Warps.Update();
+
             U.Events.OnPlayerConnected -= Events_OnPlayerConnected;
             U.Events.OnPlayerDisconnected -= Events_OnPlayerDisconnected;
             UnturnedPlayerEvents.OnPlayerDeath -= Events_OnPlayerDeath;
@@ -134,6 +137,7 @@ namespace NEXIS.Toolkit
                     {"toolkit_admin_item_added", "Added {1}({0}) to Shop - Buy Price: {2}, Sell Price: {3}"},
                     {"toolkit_admin_vehicle_added", "Added {1}({0}) to Shop - Buy Price: {2}"},
                     {"toolkit_player_buy_noexist", "That ID does not exist in the Shop!"},
+                    {"toolkit_player_buy_amount", "You can't buy more than {0} items at once!"},
                     {"toolkit_player_buy_insufficient_credits", "You do not have enough credits to afford this!"},
                     {"toolkit_player_buy", "You purchased {2} {0}s, costing {1} credits"},
                     {"toolkit_player_buy_cost", "The cost of a {1}({0}) is - Buy Price: {2}, Sell Price: {3}"},

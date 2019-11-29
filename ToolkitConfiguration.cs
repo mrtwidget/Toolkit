@@ -18,6 +18,7 @@ namespace NEXIS.Toolkit
         public bool EnableTPATimeout;
         public int TPATimeout;
         public bool ChangeDaytimeChat;
+        public int MaxBuyAmount;
 
         public void LoadDefaults()
         {
@@ -35,6 +36,7 @@ namespace NEXIS.Toolkit
             EnableTPATimeout = true;
             TPATimeout = 30;
             ChangeDaytimeChat = true;
+            MaxBuyAmount = 10;
         }
     }
 }

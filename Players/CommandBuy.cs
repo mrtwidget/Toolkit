@@ -39,6 +39,13 @@ namespace NEXIS.Toolkit.Players
                 if (command.Length == 2 && Convert.ToByte(command[1]) > 0)
                     amount = Convert.ToByte(command[1]);
 
+                // if player buys more than max limit
+                if (amount > Toolkit.Instance.Configuration.Instance.MaxBuyAmount)
+                {
+                    UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_buy_amount", Toolkit.Instance.Configuration.Instance.MaxBuyAmount), Color.red);
+                    return;
+                }
+
                 // search for item in shop by input id
                 var item = Toolkit.Instance.ItemList.Find(x => x.ID == Convert.ToUInt16(command[0]));
 

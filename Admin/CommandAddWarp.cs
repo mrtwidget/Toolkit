@@ -47,8 +47,6 @@ namespace NEXIS.Toolkit.Admin
                     w.Price = Convert.ToDecimal(command[1]);
 
                 Toolkit.Instance.WarpList.Add(w);
-                Toolkit.Instance.Warps.Update();
-
                 UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_admin_warp_added", w.Name, String.Format("{0:C}", w.Price)), Color.green);
             }
             else

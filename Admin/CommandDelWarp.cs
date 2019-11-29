@@ -43,8 +43,6 @@ namespace NEXIS.Toolkit.Admin
                 }
 
                 Toolkit.Instance.WarpList.Remove(warp);
-                Toolkit.Instance.Warps.Update();
-
                 UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_admin_warp_deleted", warp.Name), Color.green);
             }
             else

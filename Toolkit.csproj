@@ -89,6 +89,7 @@
     <Compile Include="Admin\CommandColor.cs" />
     <Compile Include="Admin\CommandDelKit.cs" />
     <Compile Include="Admin\CommandDelWarp.cs" />
+    <Compile Include="Admin\CommandToolkit.cs" />
     <Compile Include="Credits.cs" />
     <Compile Include="Kits.cs" />
     <Compile Include="Players\CommandBalance.cs" />
