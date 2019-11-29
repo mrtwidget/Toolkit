@@ -14,7 +14,7 @@ namespace NEXIS.Toolkit.Admin
 
         public AllowedCaller AllowedCaller => AllowedCaller.Player;
 
-        public bool AllowFromConsole => false;
+        public bool AllowFromConsole => true;
 
         public string Name => "addvehicle";
 

@@ -40,7 +40,7 @@ namespace NEXIS.Toolkit.Players
                 {
                     if (player.IsInVehicle)
                     {
-                        UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("jtools_warp_vehicle"), Color.red);
+                        UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_warp_vehicle"), Color.red);
                         return;
                     }
 

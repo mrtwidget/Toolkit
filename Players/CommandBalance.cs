@@ -19,7 +19,7 @@ namespace NEXIS.Toolkit
 
         public string Help => "View your credit balance";
 
-        public List<string> Aliases => new List<string>() { };
+        public List<string> Aliases => new List<string>() { "bal" };
 
         public string Syntax => "/balance";
 

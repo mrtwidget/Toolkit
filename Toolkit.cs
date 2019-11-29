@@ -29,6 +29,8 @@ namespace NEXIS.Toolkit
         public Vehicles Vehicles;
         public List<Vehicles> VehicleList;
         public int DayRequests;
+        public Kits Kits;
+        public List<Kits> KitList;
 
         // Custom message colors
         public static Color DeathColor = new Color(50, 0, 200);
@@ -61,6 +63,10 @@ namespace NEXIS.Toolkit
             // load vehicles
             Vehicles = new Vehicles();
             Vehicles.Load();
+
+            // load kits
+            Kits = new Kits();
+            Kits.Load();
 
             U.Events.OnPlayerConnected += Events_OnPlayerConnected;
             U.Events.OnPlayerDisconnected += Events_OnPlayerDisconnected;
@@ -96,6 +102,9 @@ namespace NEXIS.Toolkit
             Items.Update();
             Vehicles.Update();
 
+            // update kits
+            Kits.Update();
+
             U.Events.OnPlayerConnected -= Events_OnPlayerConnected;
             U.Events.OnPlayerDisconnected -= Events_OnPlayerDisconnected;
             UnturnedPlayerEvents.OnPlayerDeath -= Events_OnPlayerDeath;
@@ -113,9 +122,11 @@ namespace NEXIS.Toolkit
                     {"toolkit_day", "Time changed to Day per player requests!"},
                     {"toolkit_day_request", "Players are requesting Daytime. {0} more players need to say \"day\" in chat to change it"},
                     {"toolkit_admin_warp_added", "Added {0} warp costing {1} credits"},
+                    {"toolkit_admin_warp_deleted", "Permanently deleted the {0} warp!"},
                     {"toolkit_admin_warp_node_added", "Warp node added to {0}"},
                     {"toolkit_warp", "You warpped to {0} costing -{1} credits!"},
                     {"toolkit_warp_noexist", "That warp location does not exist!"},
+                    {"toolkit_warp_vehicle", "You can't warp when in a vehicle!"},
                     {"toolkit_tpa_info", "You can teleport to another player by typing: /tpa <name>"},
                     {"toolkit_warp_info", "You can warp by typing: /warp <location> or see a list of warps by typing: /warps"},
                     {"toolkit_buy_info", "Buy items by typing: /buy <id>, Sell items: /sell <id>, Price: /cost <id>"},
@@ -124,7 +135,7 @@ namespace NEXIS.Toolkit
                     {"toolkit_admin_vehicle_added", "Added {1}({0}) to Shop - Buy Price: {2}"},
                     {"toolkit_player_buy_noexist", "That ID does not exist in the Shop!"},
                     {"toolkit_player_buy_insufficient_credits", "You do not have enough credits to afford this!"},
-                    {"toolkit_player_buy", "You purchased {2} {0} for {1} credits!"},
+                    {"toolkit_player_buy", "You purchased {2} {0}s, costing {1} credits"},
                     {"toolkit_player_buy_cost", "The cost of a {1}({0}) is - Buy Price: {2}, Sell Price: {3}"},
                     {"toolkit_player_buy_cost_vehicle", "The cost of a {1}({0}) is - Buy Price: {2}"},
                     {"toolkit_player_connected", "{0} has connected to the server"},
@@ -138,6 +149,14 @@ namespace NEXIS.Toolkit
                     {"toolkit_tpa_request_deny_caller", "You have denied {0}'s teleport request"},
                     {"toolkit_tpa_request_accept", "{0} has accepted your teleport request!"},
                     {"toolkit_tpa_request_accept_caller", "{0} has been teleported to your location!"},
+                    {"toolkit_kit_exists", "A kit with that name already exists!"},
+                    {"toolkit_kit_noexist", "A kit with that name does not exist!"},
+                    {"toolkit_kit_received", "You received the {0} kit, costing {1} credits!"},
+                    {"toolkit_kit_insufficient_credits", "You do not have enough credits to purchase this kit!"},
+                    {"toolkit_sell_noexist", "You don't have that item to sell!"},
+                    {"toolkit_sell_noexist_db", "That item does not exist in the Shop database! Damn lazy admins!"},
+                    {"toolkit_sell_amount", "You don't have that many items to sell!"},
+                    {"toolkit_sell", "You sold {2} {0}s and have been credited {1}!"},
                     {"toolkit_death_acid", "{0} was covered in acid and melted into a puddle of uncool."},
                     {"toolkit_death_animal", "{0} was mauled to death by a wild animal because he tried to pet it."},
                     {"toolkit_death_bleeding", "{0} couldn't find a medkit and bled to death. Everyone is disappointed."},

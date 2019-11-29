@@ -34,29 +34,36 @@ namespace NEXIS.Toolkit.Players
 
             if (command.Length >= 1 && Toolkit.Instance.IsDigits(command[0]))
             {
+                // amount to buy
                 byte amount = 1;
-
                 if (command.Length == 2 && Convert.ToByte(command[1]) > 0)
                     amount = Convert.ToByte(command[1]);
 
-                // see if item exists in shop
+                // search for item in shop by input id
                 var item = Toolkit.Instance.ItemList.Find(x => x.ID == Convert.ToUInt16(command[0]));
-                
+
+                // if item has not been added to the shop
                 if (item == null)
+                {
                     UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_buy_noexist"), Color.red);
+                    return;
+                }
+
+                // check if player can afford item (* amount)
+                if (Toolkit.Instance.Balances[player.CSteamID.ToString()] >= (item.BuyPrice * amount))
+                {
+                    // give player the item and charge them
+                    player.GiveItem(Convert.ToUInt16(command[0]), amount);
+                    Toolkit.Instance.Balances[player.CSteamID.ToString()] = Decimal.Subtract(Toolkit.Instance.Balances[player.CSteamID.ToString()], (item.BuyPrice * amount));
+                    
+                    player.TriggerEffect(81); // money effect
+                    UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_buy", item.Name, String.Format("{0:C}", item.BuyPrice * amount), amount), Color.green);
+                }
                 else
                 {
-                    // check if player can afford item
-                    if (Toolkit.Instance.Balances[player.CSteamID.ToString()] >= (item.BuyPrice * amount))
-                    {
-                        // charge player credits for item(s)
-                        Toolkit.Instance.Balances[player.CSteamID.ToString()] = Decimal.Subtract(Toolkit.Instance.Balances[player.CSteamID.ToString()], (item.BuyPrice * amount));
-
-                        player.GiveItem(Convert.ToUInt16(command[0]), amount);
-                        UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_buy", item.Name, String.Format("{0:C}", item.BuyPrice * amount), amount), Color.green);
-                    }
-                    else
-                        UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_buy_insufficient_credits"), Color.red);
+                    // player cannot afford
+                    player.TriggerEffect(45); // explode effect lol
+                    UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_buy_insufficient_credits"), Color.red);
                 }
             }
             else

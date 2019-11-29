@@ -82,14 +82,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Admin\CommandAddItem.cs" />
+    <Compile Include="Admin\CommandAddKit.cs" />
     <Compile Include="Admin\CommandAddVehicle.cs" />
     <Compile Include="Admin\CommandAddWarp.cs" />
     <Compile Include="Admin\CommandAddWarpNode.cs" />
     <Compile Include="Admin\CommandColor.cs" />
+    <Compile Include="Admin\CommandDelKit.cs" />
+    <Compile Include="Admin\CommandDelWarp.cs" />
     <Compile Include="Credits.cs" />
+    <Compile Include="Kits.cs" />
     <Compile Include="Players\CommandBalance.cs" />
     <Compile Include="Players\CommandBuy.cs" />
     <Compile Include="Players\CommandCost.cs" />
+    <Compile Include="Players\CommandKit.cs" />
+    <Compile Include="Players\CommandKits.cs" />
     <Compile Include="Players\CommandSell.cs" />
     <Compile Include="Players\CommandTPA.cs" />
     <Compile Include="Players\CommandVbuy.cs" />
