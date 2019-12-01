@@ -40,7 +40,7 @@ namespace NEXIS.Toolkit.Players
                 foreach (Kits kit in Toolkit.Instance.KitList)
                 {
                     count++;
-                    kits += kit.Name;
+                    kits += kit.Name + "($" + kit.Cost + ")";
 
                     if (count < Toolkit.Instance.KitList.Count)
                         kits += ", ";

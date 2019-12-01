@@ -73,6 +73,8 @@ namespace NEXIS.Toolkit.Players
                         // remove the item and pay the player
                         player.Inventory.removeItem(search[i].page, player.Inventory.getIndex(search[i].page, search[i].jar.x, search[i].jar.y));
                         Toolkit.Instance.Balances[player.CSteamID.ToString()] = Decimal.Add(Toolkit.Instance.Balances[player.CSteamID.ToString()], item.SellPrice);
+                        if (Toolkit.Instance.Configuration.Instance.UIBalanceEnabled)
+                            Toolkit.Instance.UpdateUI(player);
                     }
 
                     player.TriggerEffect(81); // money effect

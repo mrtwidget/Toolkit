@@ -31,6 +31,10 @@ namespace NEXIS.Toolkit
         public int DayRequests;
         public Kits Kits;
         public List<Kits> KitList;
+        public Messages Messages;
+        public List<Messages> MessageList;
+        public DateTime? LastMessage;
+        public int LastMessageIndex = 0;
 
         // Custom message colors
         public static Color DeathColor = new Color(50, 0, 200);
@@ -67,6 +71,10 @@ namespace NEXIS.Toolkit
             // load kits
             Kits = new Kits();
             Kits.Load();
+
+            // load messages
+            Messages = new Messages();
+            Messages.Load();
 
             U.Events.OnPlayerConnected += Events_OnPlayerConnected;
             U.Events.OnPlayerDisconnected += Events_OnPlayerDisconnected;
@@ -108,6 +116,9 @@ namespace NEXIS.Toolkit
             // update warps
             Warps.Update();
 
+            // update messages
+            Messages.Update();
+
             U.Events.OnPlayerConnected -= Events_OnPlayerConnected;
             U.Events.OnPlayerDisconnected -= Events_OnPlayerDisconnected;
             UnturnedPlayerEvents.OnPlayerDeath -= Events_OnPlayerDeath;
@@ -122,11 +133,18 @@ namespace NEXIS.Toolkit
             {
                 return new TranslationList() {
                     {"toolkit_disabled", "Toolkit is currently unavailable"},
+                    {"toolkit_tpa_disabled", "Sorry, but TPA is currently disabled"},
                     {"toolkit_day", "Time changed to Day per player requests!"},
                     {"toolkit_day_request", "Players are requesting Daytime. {0} more players need to say \"day\" in chat to change it"},
                     {"toolkit_admin_warp_added", "Added {0} warp costing {1} credits"},
                     {"toolkit_admin_warp_deleted", "Permanently deleted the {0} warp!"},
                     {"toolkit_admin_warp_node_added", "Warp node added to {0}"},
+                    {"toolkit_admin_item_noexist", "That item does not exist in the Shop!"},
+                    {"toolkit_admin_vehicle_noexist", "That vehicle does not exist in the Shop!"},
+                    {"toolkit_admin_item_deleted", "Removed item {0}({1}) from Shop!"},
+                    {"toolkit_admin_vehicle_deleted", "Removed vehicle {0}({1}) from Shop!"},
+                    {"toolkit_admin_item_updated", "Updated item {0}({1}), Buy Price: {2}, Sell Price: {3}"},
+                    {"toolkit_admin_vehicle_updated", "Updated vehicle {0}({1}), Buy Price: {2}"},
                     {"toolkit_warp", "You warpped to {0} costing -{1} credits!"},
                     {"toolkit_warp_noexist", "That warp location does not exist!"},
                     {"toolkit_warp_vehicle", "You can't warp when in a vehicle!"},
@@ -136,6 +154,7 @@ namespace NEXIS.Toolkit
                     {"toolkit_buy_vehicle_info", "You can buy vehicles by typing: /vbuy <id>, or /vcost <id> for the price"},
                     {"toolkit_admin_item_added", "Added {1}({0}) to Shop - Buy Price: {2}, Sell Price: {3}"},
                     {"toolkit_admin_vehicle_added", "Added {1}({0}) to Shop - Buy Price: {2}"},
+                    {"toolkit_admin_addmessage", "New message added!"},
                     {"toolkit_player_buy_noexist", "That ID does not exist in the Shop!"},
                     {"toolkit_player_buy_amount", "You can't buy more than {0} items at once!"},
                     {"toolkit_player_buy_insufficient_credits", "You do not have enough credits to afford this!"},
@@ -161,6 +180,16 @@ namespace NEXIS.Toolkit
                     {"toolkit_sell_noexist_db", "That item does not exist in the Shop database! Damn lazy admins!"},
                     {"toolkit_sell_amount", "You don't have that many items to sell!"},
                     {"toolkit_sell", "You sold {2} {0}s and have been credited {1}!"},
+                    {"toolkit_pay_disabled", "Oh noes! This command is currently disabled."},
+                    {"toolkit_pay_player_amount", "You can't pay something nothing. What are you even trying to do? xD"},
+                    {"toolkit_pay_credits", "You don't have enough credits!"},
+                    {"toolkit_pay_giver", "You payed {0} {1} credits!"},
+                    {"toolkit_pay_receiver", "{0} payed you {1} credits!"},
+                    {"toolkit_pay_player_null", "Can't find a player with that name"},
+                    {"toolkit_pay_yourself", "You can't pay yourself. If you could we'd all work from home."},
+                    {"toolkit_exchange_disabled", "Sorry, but the exchange is currently disabled"},
+                    {"toolkit_exchange_experience", "You don't have that much experience!"},
+                    {"toolkit_exchange_complete", "You exchanged {0} experience and received {1} credits!"},
                     {"toolkit_death_acid", "{0} was covered in acid and melted into a puddle of uncool."},
                     {"toolkit_death_animal", "{0} was mauled to death by a wild animal because he tried to pet it."},
                     {"toolkit_death_bleeding", "{0} couldn't find a medkit and bled to death. Everyone is disappointed."},
@@ -215,6 +244,10 @@ namespace NEXIS.Toolkit
             }
             else
                 UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_player_balance", String.Format("{0:C}", Balances[player.CSteamID.ToString()])), Color.yellow);
+
+            // load balance to UI
+            if (Configuration.Instance.UIBalanceEnabled)
+                UpdateUI(player);
         }
 
         public void Events_OnPlayerDisconnected(UnturnedPlayer player)
@@ -241,7 +274,7 @@ namespace NEXIS.Toolkit
                         // subtract minimum amount from total and pay player the remainder
                         decimal payout = Convert.ToDecimal(distance - Configuration.Instance.PayoutMinDistance);
                         Balances[murderer.ToString()] = Decimal.Add(Balances[murderer.ToString()], payout);
-                        UnturnedChat.Say(Translations.Instance.Translate("toolkit_player_kill_multiplier", player.CharacterName, payout, Configuration.Instance.PayoutMinDistance), Color.yellow);
+                        UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_player_kill_multiplier", player.CharacterName, payout, Configuration.Instance.PayoutMinDistance), Color.yellow);
                     }
                 }
                 return;
@@ -309,6 +342,8 @@ namespace NEXIS.Toolkit
                     {
                         player.TriggerEffect(81); // money effect
                         Balances[player.CSteamID.ToString()] = Decimal.Add(Balances[player.CSteamID.ToString()], Configuration.Instance.PayoutKillZombie);
+                        if (Configuration.Instance.UIBalanceEnabled)
+                            UpdateUI(player);
                         UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_player_zombie_kill", String.Format("{0:C}", Configuration.Instance.PayoutKillZombie)), Color.yellow);
                     }
                     break;
@@ -318,6 +353,8 @@ namespace NEXIS.Toolkit
                     {
                         player.TriggerEffect(81); // money effect
                         Balances[player.CSteamID.ToString()] = Decimal.Add(Balances[player.CSteamID.ToString()], Configuration.Instance.PayoutKillMegaZombie);
+                        if (Configuration.Instance.UIBalanceEnabled)
+                            UpdateUI(player);
                         UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_player_mega_zombie_kill", String.Format("{0:C}", Configuration.Instance.PayoutKillMegaZombie)), Color.magenta);
                     }
                     break;
@@ -327,6 +364,8 @@ namespace NEXIS.Toolkit
                     {
                         player.TriggerEffect(81); // money effect
                         Balances[player.CSteamID.ToString()] = Decimal.Add(Balances[player.CSteamID.ToString()], Configuration.Instance.PayoutKillPlayer);
+                        if (Configuration.Instance.UIBalanceEnabled)
+                            UpdateUI(player);
                         UnturnedChat.Say(player, Translations.Instance.Translate("toolkit_player_player_kill", String.Format("{0:C}", Configuration.Instance.PayoutKillPlayer)), Color.cyan);
                     }
                     break;
@@ -339,6 +378,43 @@ namespace NEXIS.Toolkit
         {
             if (Instance.State != PluginState.Loaded) return;
 
+            // show automatted messages if enabled
+            if (Configuration.Instance.AutoMessagesEnabled)
+            {
+                if (LastMessage == null || (DateTime.Now - LastMessage.Value).TotalSeconds > Configuration.Instance.AutoMessageInterval)
+                {
+                    // random message if enabled
+                    if (Configuration.Instance.AutoMessageRandom)
+                    {
+                        System.Random rnd = new System.Random();
+                        int r = rnd.Next(MessageList.Count);
+
+                        // try to avoid repeat messages
+                        if (LastMessageIndex == r) r=0;
+
+                        // set message color and send
+                        Color color = MessageList[r].Color.ToColor();
+                        UnturnedChat.Say(MessageList[r].Message, color);
+                        LastMessageIndex = r;
+                    }
+                    // display messages in order and then repeat
+                    else
+                    {
+                        if (LastMessageIndex == MessageList.Count)
+                        {
+                            LastMessageIndex = 0;
+                            return;
+                        }
+
+                        // set message color and send
+                        Color color = MessageList[LastMessageIndex].Color.ToColor();
+                        UnturnedChat.Say(MessageList[LastMessageIndex].Message, color);
+                        LastMessageIndex++;
+                    }
+
+                    LastMessage = DateTime.Now;
+                }
+            }
         }
 
         /**
@@ -495,6 +571,18 @@ namespace NEXIS.Toolkit
             return Math.Round((double)Vector3.Distance(player.Position, UnturnedPlayer.FromCSteamID(murderer).Position));
         }
 
+        /**
+         * UPDATE USER INTERFACE
+         * This function updates the UconomyUI mod with the player's current
+         * credit balance. Requires UconomyUI
+         */
+        public void UpdateUI(UnturnedPlayer player)
+        {
+            EffectManager.askEffectClearByID(65090, player.CSteamID);
+            EffectManager.sendUIEffect(65090, 0, player.CSteamID, true, String.Format("{0:C}", Balances[player.CSteamID.ToString()]));
+        }
+
+        /* Check if string contains only digits */
         public bool IsDigits(string str)
         {
             foreach (char c in str)
@@ -504,6 +592,15 @@ namespace NEXIS.Toolkit
             }
 
             return true;
+        }
+    }
+
+    /* Convert string into Color */
+    public static class ColorExtentions
+    {
+        public static Color ToColor(this string color)
+        {
+            return (Color)typeof(Color).GetProperty(color.ToLowerInvariant()).GetValue(null, null);
         }
     }
 }

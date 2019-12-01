@@ -47,6 +47,8 @@ namespace NEXIS.Toolkit.Players
                     if (Toolkit.Instance.Balances[player.CSteamID.ToString()] >= warp.Price)
                     {
                         Toolkit.Instance.Balances[player.CSteamID.ToString()] = Decimal.Subtract(Toolkit.Instance.Balances[player.CSteamID.ToString()], warp.Price);
+                        if (Toolkit.Instance.Configuration.Instance.UIBalanceEnabled)
+                            Toolkit.Instance.UpdateUI(player);
 
                         // randomize position
                         System.Random rand = new System.Random();

@@ -43,12 +43,25 @@ namespace NEXIS.Toolkit
                         break;
                     case "info":
                         // show database info
-                        UnturnedChat.Say(player, "Toolkit Database Status:", Color.yellow);
+                        UnturnedChat.Say(player, "Toolkit Database Info:", Color.yellow);
                         UnturnedChat.Say(player, "Credits: " + Toolkit.Instance.Balances.Count + 
                             ", Warps: " + Toolkit.Instance.WarpList.Count +
                             ", Items: " + Toolkit.Instance.ItemList.Count +
                             ", Vehicles: " + Toolkit.Instance.VehicleList.Count +
-                            ", Kits: " + Toolkit.Instance.KitList.Count, Color.white);
+                            ", Kits: " + Toolkit.Instance.KitList.Count +
+                            ", Messages: " + Toolkit.Instance.MessageList.Count, Color.white);
+                        UnturnedChat.Say(player, "Toolkit Config Settings:", Color.yellow);
+                        UnturnedChat.Say(player, "Initial Credits: " + String.Format("{0:C}", Toolkit.Instance.Configuration.Instance.InitialBalance) +
+                            ", PayZombieKill: " + Toolkit.Instance.Configuration.Instance.PayZombieKills +
+                            ", PayPlayerKill: " + Toolkit.Instance.Configuration.Instance.PayPlayerKills +
+                            ", PayDistanceX: " + Toolkit.Instance.Configuration.Instance.PayDistanceMultiplier + "(min " + Toolkit.Instance.Configuration.Instance.PayoutMinDistance + "m)" +
+                            ", Payouts: " + "(Plr: " + String.Format("{0:C}", Toolkit.Instance.Configuration.Instance.PayoutKillPlayer) + ", Norm: " + String.Format("{0:C}", Toolkit.Instance.Configuration.Instance.PayoutKillZombie) + ", Mega: " + String.Format("{0:C}", Toolkit.Instance.Configuration.Instance.PayoutKillMegaZombie) + ")"
+                            , Color.white);
+                        UnturnedChat.Say(player, ", TPA: " + "Enabled: " + Toolkit.Instance.Configuration.Instance.EnableTPA + ", TPA Timeout: " + Toolkit.Instance.Configuration.Instance.EnableTPATimeout + "(" + Toolkit.Instance.Configuration.Instance.TPATimeout + ")" +
+                            ", DayInChat: " + Toolkit.Instance.Configuration.Instance.ChangeDaytimeChat +
+                            ", MaxBuyAmt: " + Toolkit.Instance.Configuration.Instance.MaxBuyAmount +
+                            ", AutoMsg: (Enabled: " + Toolkit.Instance.Configuration.Instance.AutoMessagesEnabled + ", Random: " + Toolkit.Instance.Configuration.Instance.AutoMessageRandom + ", Interval: " + Toolkit.Instance.Configuration.Instance.AutoMessageInterval + ", Default color: " + Toolkit.Instance.Configuration.Instance.AutoMessageDefaultColor + ")"
+                            , Color.white);
                         break;
                     case "update":
                         // update all json files
@@ -57,7 +70,8 @@ namespace NEXIS.Toolkit
                         Toolkit.Instance.Vehicles.Update();
                         Toolkit.Instance.Kits.Update();
                         Toolkit.Instance.Warps.Update();
-                        UnturnedChat.Say(player, "Toolkit files updated!", Color.yellow);
+                        Toolkit.Instance.Messages.Update();
+                        UnturnedChat.Say(player, "Toolkit database files updated!", Color.green);
                         break;
                 }                
             }

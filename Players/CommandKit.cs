@@ -78,6 +78,8 @@ namespace NEXIS.Toolkit.Players
 
                 // charge player for the kit
                 Toolkit.Instance.Balances[player.CSteamID.ToString()] = Decimal.Subtract(Toolkit.Instance.Balances[player.CSteamID.ToString()], kit.Cost);
+                if (Toolkit.Instance.Configuration.Instance.UIBalanceEnabled)
+                    Toolkit.Instance.UpdateUI(player);
                 UnturnedChat.Say(player, Toolkit.Instance.Translations.Instance.Translate("toolkit_kit_received", kit.Name, String.Format("{0:C}", kit.Cost)), Color.green);
             }
             else

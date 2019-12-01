@@ -33,6 +33,12 @@ namespace NEXIS.Toolkit.Players
         {
             UnturnedPlayer player = (UnturnedPlayer)caller;
 
+            if (!Toolkit.Instance.Configuration.Instance.EnableTPA)
+            {
+                UnturnedChat.Say(player, Toolkit.Instance.Translations.Instance.Translate("toolkit_tpa_disabled"), Color.red);
+                return;
+            }
+
             if (command.Length == 1)
             {
                 if (command[0].ToLower() == "accept" || command[0].ToLower() == "a")
@@ -111,7 +117,7 @@ namespace NEXIS.Toolkit.Players
                         UnturnedChat.Say(player, Toolkit.Instance.Translations.Instance.Translate("toolkit_tpa_request_caller", p.CharacterName), Color.green);
                         UnturnedChat.Say(p, Toolkit.Instance.Translations.Instance.Translate("toolkit_tpa_request", player.CharacterName), Color.green);
 
-                        break;
+                        return;
                     }
                 }
 

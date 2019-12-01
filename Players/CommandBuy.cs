@@ -62,7 +62,8 @@ namespace NEXIS.Toolkit.Players
                     // give player the item and charge them
                     player.GiveItem(Convert.ToUInt16(command[0]), amount);
                     Toolkit.Instance.Balances[player.CSteamID.ToString()] = Decimal.Subtract(Toolkit.Instance.Balances[player.CSteamID.ToString()], (item.BuyPrice * amount));
-                    
+                    if (Toolkit.Instance.Configuration.Instance.UIBalanceEnabled)
+                        Toolkit.Instance.UpdateUI(player);
                     player.TriggerEffect(81); // money effect
                     UnturnedChat.Say(caller, Toolkit.Instance.Translations.Instance.Translate("toolkit_player_buy", item.Name, String.Format("{0:C}", item.BuyPrice * amount), amount), Color.green);
                 }
